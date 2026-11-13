@@ -1,9 +1,12 @@
 # Leaderboard Card for Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![Validate](https://github.com/nicolasjweber/ha-leaderboard-card/actions/workflows/validate.yml/badge.svg)](https://github.com/nicolasjweber/ha-leaderboard-card/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A general-purpose, responsive Home Assistant Lovelace card that ranks numeric entities and displays the **Top N** in a stepped **3-Place Podium** or **Ranked Progress Bar List**—ideal for coffee machine drink counters, top energy consumers, room temperatures, or any numeric sensors.
+
+![Leaderboard Card Preview](docs/preview.png)
 
 ## Features
 
