@@ -1479,11 +1479,11 @@ const CARD_STYLES = `
     inline-size: 100%;
     min-inline-size: 0;
     text-align: center;
-    padding-inline: 4px;
+    padding-inline: 2px;
   }
 
   .podium-name {
-    font-size: 0.86rem;
+    font-size: clamp(0.74rem, 2.8cqi, 0.86rem);
     font-weight: 700;
     line-height: 1.25;
     color: var(--lb-text);
@@ -1494,7 +1494,7 @@ const CARD_STYLES = `
   }
 
   .podium-item.rank-1 .podium-name {
-    font-size: 0.94rem;
+    font-size: clamp(0.8rem, 3.1cqi, 0.94rem);
   }
 
   .podium-value {
@@ -1681,6 +1681,7 @@ const CARD_STYLES = `
   }
 
   .progress-track {
+    display: block;
     inline-size: 100%;
     block-size: 7px;
     border-radius: 999px;
@@ -1689,6 +1690,7 @@ const CARD_STYLES = `
   }
 
   .progress-fill {
+    display: block;
     block-size: 100%;
     inline-size: var(--bar-width, 0%);
     border-radius: 999px;

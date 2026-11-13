@@ -171,6 +171,39 @@
         color: var(--primary-color);
         min-block-size: 1.2em;
       }
+
+      /* Clean 3-card showcase mode (?showcase=1) */
+      body.is-showcase {
+        background: linear-gradient(135deg, #eef2f6 0%, #f8fafc 50%, #e0f2fe 100%);
+        padding: 20px;
+        min-block-size: 100dvh;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      body.is-showcase .page {
+        display: none;
+      }
+
+      .showcase-stage {
+        display: none;
+        inline-size: 100%;
+        max-inline-size: 984px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        align-items: center;
+      }
+
+      body.is-showcase .showcase-stage {
+        display: grid;
+      }
+
+      .showcase-card-wrap {
+        border-radius: 14px;
+        box-shadow: 0 10px 28px -6px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05);
+        min-inline-size: 0;
+      }
     </style>
   </head>
   <body>
@@ -211,6 +244,12 @@
           <ha-leaderboard-card-editor id="card-editor"></ha-leaderboard-card-editor>
         </div>
       </div>
+    </div>
+
+    <div class="showcase-stage" id="showcase-stage" aria-label="Leaderboard Card Showcase">
+      <div class="showcase-card-wrap"><ha-leaderboard-card id="sc-podium"></ha-leaderboard-card></div>
+      <div class="showcase-card-wrap"><ha-leaderboard-card id="sc-list"></ha-leaderboard-card></div>
+      <div class="showcase-card-wrap"><ha-leaderboard-card id="sc-both"></ha-leaderboard-card></div>
     </div>
 
     <script type="module">
@@ -267,12 +306,17 @@
           'sensor.energy_kitchen': {
             entity_id: 'sensor.energy_kitchen',
             state: '4.7',
-            attributes: { friendly_name: 'Kitchen Appliances', unit_of_measurement: 'kWh', device_class: 'energy' },
+            attributes: { friendly_name: 'Kitchen', unit_of_measurement: 'kWh', device_class: 'energy' },
           },
           'sensor.energy_office': {
             entity_id: 'sensor.energy_office',
             state: '2.9',
             attributes: { friendly_name: 'Home Office', unit_of_measurement: 'kWh', device_class: 'energy' },
+          },
+          'sensor.energy_laundry': {
+            entity_id: 'sensor.energy_laundry',
+            state: '1.8',
+            attributes: { friendly_name: 'Laundry', unit_of_measurement: 'kWh', device_class: 'energy' },
           },
         },
         async callWS(msg) {
@@ -450,7 +494,66 @@
         simButtons.appendChild(btn);
       }
 
-      applyState(currentConfig);
+      if (new URLSearchParams(window.location.search).has('showcase')) {
+        document.body.classList.add('is-showcase');
+        const showcaseConfigs = {
+          'sc-podium': {
+            type: 'custom:ha-leaderboard-card',
+            title: 'Top 3 Drinks',
+            subtitle: 'Coffee Machine',
+            header_icon: 'mdi:coffee',
+            layout: 'podium',
+            podium_order: '2-1-3',
+            limit: 3,
+            period: 'all',
+            show_period_selector: true,
+            include_pattern: 'sensor.coffee_machine_*',
+            exclude_pattern: '*_total*',
+            name_strip_prefix: 'Coffee Machine ',
+            show_percentage: true,
+            entities: [
+              { entity: 'sensor.coffee_machine_cappuccino', icon: 'mdi:coffee' },
+              { entity: 'sensor.coffee_machine_espresso', icon: 'mdi:coffee-maker' },
+              { entity: 'sensor.coffee_machine_hot_water', icon: 'mdi:water' },
+            ],
+          },
+          'sc-list': {
+            type: 'custom:ha-leaderboard-card',
+            title: 'Drink Ranking',
+            subtitle: 'All Beverages',
+            header_icon: 'mdi:chart-bar',
+            layout: 'list',
+            limit: 5,
+            include_pattern: 'sensor.coffee_machine_*',
+            exclude_pattern: '*_total*',
+            name_strip_prefix: 'Coffee Machine ',
+            show_percentage: true,
+            entities: [],
+          },
+          'sc-both': {
+            type: 'custom:ha-leaderboard-card',
+            title: 'Energy Usage',
+            subtitle: 'Today',
+            header_icon: 'mdi:flash',
+            layout: 'both',
+            limit: 5,
+            decimals: 1,
+            include_pattern: 'sensor.energy_*',
+            show_percentage: true,
+            entities: [],
+          },
+        };
+
+        for (const [id, cfg] of Object.entries(showcaseConfigs)) {
+          const el = document.getElementById(id);
+          if (el) {
+            el.setConfig(cfg);
+            el.hass = { ...hass, states: { ...hass.states } };
+          }
+        }
+      } else {
+        applyState(currentConfig);
+      }
     </script>
   </body>
 </html>
