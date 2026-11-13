@@ -4,7 +4,7 @@
 [![Validate](https://github.com/nicolasjweber/ha-leaderboard-card/actions/workflows/validate.yml/badge.svg)](https://github.com/nicolasjweber/ha-leaderboard-card/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A general-purpose, responsive Home Assistant Lovelace card that ranks numeric entities and displays the **Top N** in a stepped **3-Place Podium** or **Ranked Progress Bar List**—ideal for coffee machine drink counters, top energy consumers, room temperatures, or any numeric sensors.
+A general-purpose, responsive Home Assistant Lovelace card that ranks numeric entities and displays the **Top N** in a stepped **3-Place Podium** or **Ranked Progress Bar List**, ideal for coffee machine drink counters, top energy consumers, room temperatures, or any numeric sensors.
 
 ![Leaderboard Card Preview](docs/preview.png)
 
@@ -14,7 +14,7 @@ A general-purpose, responsive Home Assistant Lovelace card that ranks numeric en
   - `podium`: Classic stepped 3-place podium (`2nd · 1st · 3rd` or `1st · 2nd · 3rd`) with gold/silver/bronze accents, crown badge, and optional runner-up list when `limit > 3`.
   - `list`: Ranked rows with relative progress bars, rank badges, and % of total share.
   - `both`: Top 3 Podium paired with a Ranked Bar List below.
-- **Time Period Ranking & Inline Switcher**: Rank entities over `today`, `week`, `month`, `year`, `this_week`, `this_month`, or `this_year` directly from Home Assistant Long-Term Statistics (with automatic History fallback)—no Utility Meter helpers required. Optionally show a centered inline switcher (`Today · Week · Month · Year · All`).
+- **Time Period Ranking & Inline Switcher**: Rank entities over `today`, `week`, `month`, `year`, `this_week`, `this_month`, or `this_year` directly from Home Assistant Long-Term Statistics (with automatic History fallback), with no Utility Meter helpers required. Optionally show a centered inline switcher (`Today · Week · Month · Year · All`).
 - **Auto-Filter & Wildcards**: Automatically discover and rank entities using `include_pattern` / `exclude_pattern` (e.g., `sensor.coffee_machine_*` excluding `*_total*`), or advanced `filter.include` / `filter.exclude` rules (by `domain`, `area`, `device`, `state_min`, `state_max`, `attributes`).
 - **Name Cleanup**: Strip repetitive prefixes/suffixes (`name_strip_prefix: "Coffee Machine "`) automatically while preserving per-entity custom overrides.
 - **Bilingual UI (English & German)**: Automatically adapts to Home Assistant's language (`en` / `de`) or an explicit `language` override.
@@ -153,13 +153,3 @@ node --test test/leaderboard.test.mjs
 ```
 
 You can open `index.html` via any local static file server (e.g. `node scripts/serve.mjs`) to preview the card and visual editor interactively.
-
----
-
-## Publishing & HACS Checklist
-
-This repository is pre-configured for HACS (`hacs.json` with `content_in_root: true`, `ha-leaderboard-card.js` at root, MIT `LICENSE`, and GitHub Actions workflows):
-
-1. Create a public GitHub repository (e.g. `ha-leaderboard-card`) and set a repository **Description** and **Topics** (`hacs`, `home-assistant`, `lovelace`, `custom-card`).
-2. Push the `main` branch and `v1.0.0` tag (`git push -u origin main --tags`) — `.github/workflows/release.yml` will automatically build, test, and attach `ha-leaderboard-card.js` to the GitHub Release.
-3. Add the repository URL in Home Assistant under **HACS → Frontend → ⋮ → Custom repositories** (Category: **Dashboard**).

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home Assistant Leaderboard Card — Live Preview</title>
+    <title>Home Assistant Leaderboard Card</title>
     <style>
       :root {
         color-scheme: light dark;
@@ -36,6 +36,16 @@
 
       * {
         box-sizing: border-box;
+      }
+
+      html,
+      body {
+        scrollbar-width: none;
+      }
+
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar {
+        display: none;
       }
 
       body {
@@ -167,7 +177,7 @@
     <div class="page">
       <header class="topbar">
         <div>
-          <h1>ha-leaderboard-card — Interactive Workbench</h1>
+          <h1>ha-leaderboard-card</h1>
           <p>Test Podium &amp; Ranked Bar List views, auto-filter patterns, and the Home Assistant visual editor.</p>
         </div>
         <div class="toolbar-actions">
