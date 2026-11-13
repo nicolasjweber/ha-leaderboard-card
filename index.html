@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home Assistant Leaderboard Card — Live Preview</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f1f5f9;
+        --panel: #ffffff;
+        --panel-border: #e2e8f0;
+        --text: #0f172a;
+        --muted: #64748b;
+        --primary-text-color: #0f172a;
+        --secondary-text-color: #64748b;
+        --ha-card-background: #ffffff;
+        --secondary-background-color: rgba(148, 163, 184, 0.12);
+        --divider-color: rgba(148, 163, 184, 0.25);
+        --primary-color: #0284c7;
+      }
+
+      html[data-theme="dark"] {
+        --bg: #0b1120;
+        --panel: #111827;
+        --panel-border: #1e293b;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --primary-text-color: #f8fafc;
+        --secondary-text-color: #94a3b8;
+        --ha-card-background: #172033;
+        --secondary-background-color: rgba(148, 163, 184, 0.1);
+        --divider-color: rgba(148, 163, 184, 0.2);
+        --primary-color: #38bdf8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-block-size: 100dvh;
+        padding: 24px;
+      }
+
+      .page {
+        max-inline-size: 1180px;
+        margin-inline: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .topbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 20px;
+        border-radius: 16px;
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+      }
+
+      .topbar h1 {
+        margin: 0;
+        font-size: 1.25rem;
+      }
+
+      .topbar p {
+        margin: 2px 0 0;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .toolbar-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      button.pill-btn {
+        appearance: none;
+        border: 1px solid var(--panel-border);
+        background: var(--secondary-background-color);
+        color: var(--text);
+        padding: 7px 12px;
+        border-radius: 999px;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button.pill-btn.is-active,
+      button.pill-btn:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+      }
+
+      .workbench {
+        display: grid;
+        grid-template-columns: minmax(300px, 440px) minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+      }
+
+      @media (max-width: 880px) {
+        .workbench {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .preview-col,
+      .editor-col {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .panel-box {
+        padding: 16px;
+        border-radius: 16px;
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+      }
+
+      .panel-box h2 {
+        margin: 0 0 10px;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+      }
+
+      .sim-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      pre.yaml-out {
+        margin: 0;
+        padding: 12px;
+        border-radius: 10px;
+        background: var(--secondary-background-color);
+        border: 1px solid var(--panel-border);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.78rem;
+        overflow-x: auto;
+        line-height: 1.45;
+      }
+
+      .toast {
+        font-size: 0.8rem;
+        color: var(--primary-color);
+        min-block-size: 1.2em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <h1>ha-leaderboard-card — Interactive Workbench</h1>
+          <p>Test Podium &amp; Ranked Bar List views, auto-filter patterns, and the Home Assistant visual editor.</p>
+        </div>
+        <div class="toolbar-actions">
+          <button type="button" class="pill-btn is-active" data-preset="coffeeTop3">Coffee Top 3</button>
+          <button type="button" class="pill-btn" data-preset="coffeeTop5">Coffee Top 5 (Podium + List)</button>
+          <button type="button" class="pill-btn" data-preset="coffeeList">Ranked Bar List</button>
+          <button type="button" class="pill-btn" data-preset="energy">Energy Consumers</button>
+          <button type="button" class="pill-btn" id="lang-toggle">Language: EN</button>
+          <button type="button" class="pill-btn" id="theme-toggle">Toggle Dark Mode</button>
+        </div>
+      </header>
+
+      <div class="workbench">
+        <div class="preview-col">
+          <ha-leaderboard-card id="preview-card"></ha-leaderboard-card>
+          <div class="toast" id="event-log" role="status"></div>
+
+          <div class="panel-box">
+            <h2>Simulate Coffee Machine Activity</h2>
+            <div class="sim-buttons" id="sim-buttons"></div>
+          </div>
+
+          <div class="panel-box">
+            <h2>Live YAML Config</h2>
+            <pre class="yaml-out" id="yaml-out"></pre>
+          </div>
+        </div>
+
+        <div class="editor-col panel-box">
+          <h2>Visual Card Editor</h2>
+          <ha-leaderboard-card-editor id="card-editor"></ha-leaderboard-card-editor>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import './ha-leaderboard-card.js';
+
+      const hass = {
+        locale: { language: 'en' },
+        states: {
+          'sensor.coffee_machine_cappuccino': {
+            entity_id: 'sensor.coffee_machine_cappuccino',
+            state: '48',
+            attributes: { friendly_name: 'Coffee Machine Cappuccino', unit_of_measurement: 'cups' },
+          },
+          'sensor.coffee_machine_espresso': {
+            entity_id: 'sensor.coffee_machine_espresso',
+            state: '34',
+            attributes: { friendly_name: 'Coffee Machine Espresso', unit_of_measurement: 'cups' },
+          },
+          'sensor.coffee_machine_latte': {
+            entity_id: 'sensor.coffee_machine_latte',
+            state: '29',
+            attributes: { friendly_name: 'Coffee Machine Caffè Latte', unit_of_measurement: 'cups' },
+          },
+          'sensor.coffee_machine_americano': {
+            entity_id: 'sensor.coffee_machine_americano',
+            state: '19',
+            attributes: { friendly_name: 'Coffee Machine Americano', unit_of_measurement: 'cups' },
+          },
+          'sensor.coffee_machine_hot_water': {
+            entity_id: 'sensor.coffee_machine_hot_water',
+            state: '15',
+            attributes: { friendly_name: 'Coffee Machine Hot Water', unit_of_measurement: 'cups' },
+          },
+          'sensor.coffee_machine_flat_white': {
+            entity_id: 'sensor.coffee_machine_flat_white',
+            state: '11',
+            attributes: { friendly_name: 'Coffee Machine Flat White', unit_of_measurement: 'cups' },
+          },
+          'sensor.coffee_machine_total_drinks': {
+            entity_id: 'sensor.coffee_machine_total_drinks',
+            state: '156',
+            attributes: { friendly_name: 'Coffee Machine Total Drinks', unit_of_measurement: 'cups' },
+          },
+          'sensor.energy_ev_charger': {
+            entity_id: 'sensor.energy_ev_charger',
+            state: '18.4',
+            attributes: { friendly_name: 'EV Charger', unit_of_measurement: 'kWh', device_class: 'energy' },
+          },
+          'sensor.energy_heat_pump': {
+            entity_id: 'sensor.energy_heat_pump',
+            state: '11.2',
+            attributes: { friendly_name: 'Heat Pump', unit_of_measurement: 'kWh', device_class: 'energy' },
+          },
+          'sensor.energy_kitchen': {
+            entity_id: 'sensor.energy_kitchen',
+            state: '4.7',
+            attributes: { friendly_name: 'Kitchen Appliances', unit_of_measurement: 'kWh', device_class: 'energy' },
+          },
+          'sensor.energy_office': {
+            entity_id: 'sensor.energy_office',
+            state: '2.9',
+            attributes: { friendly_name: 'Home Office', unit_of_measurement: 'kWh', device_class: 'energy' },
+          },
+        },
+        async callWS(msg) {
+          if (msg?.type === 'recorder/statistics_during_period') {
+            const diffHours =
+              (new Date(msg.end_time).getTime() - new Date(msg.start_time).getTime()) / 3600000;
+            const scale =
+              diffHours <= 25 ? 0.08 : diffHours <= 175 ? 0.25 : diffHours <= 750 ? 0.6 : 0.9;
+            const out = {};
+            for (const id of msg.statistic_ids || []) {
+              const cur = Number(hass.states[id]?.state || 0);
+              const val = Number.isInteger(cur)
+                ? Math.max(1, Math.round(cur * scale))
+                : Math.round(cur * scale * 10) / 10;
+              out[id] = [{ change: val }];
+            }
+            return out;
+          }
+          return {};
+        },
+      };
+
+      const presets = {
+        coffeeTop3: {
+          type: 'custom:ha-leaderboard-card',
+          title: 'Top 3 Drinks',
+          subtitle: 'Coffee Machine',
+          header_icon: 'mdi:coffee',
+          layout: 'podium',
+          podium_order: '2-1-3',
+          limit: 3,
+          period: 'all',
+          show_period_selector: true,
+          include_pattern: 'sensor.coffee_machine_*',
+          exclude_pattern: '*_total*',
+          name_strip_prefix: 'Coffee Machine ',
+          show_percentage: true,
+          entities: [
+            { entity: 'sensor.coffee_machine_cappuccino', icon: 'mdi:coffee' },
+            { entity: 'sensor.coffee_machine_espresso', icon: 'mdi:coffee-maker' },
+            { entity: 'sensor.coffee_machine_hot_water', icon: 'mdi:water' },
+          ],
+        },
+        coffeeTop5: {
+          type: 'custom:ha-leaderboard-card',
+          title: 'Drink Leaderboard',
+          subtitle: 'Top 3 Podium + Runners-up',
+          header_icon: 'mdi:trophy',
+          layout: 'both',
+          limit: 5,
+          include_pattern: 'sensor.coffee_machine_*',
+          exclude_pattern: '*_total*',
+          name_strip_prefix: 'Coffee Machine ',
+          show_percentage: true,
+          entities: [],
+        },
+        coffeeList: {
+          type: 'custom:ha-leaderboard-card',
+          title: 'Most Brewed Drinks',
+          subtitle: 'All Coffee Machine Counters',
+          header_icon: 'mdi:chart-bar',
+          layout: 'list',
+          limit: 6,
+          include_pattern: 'sensor.coffee_machine_*',
+          exclude_pattern: '*_total*',
+          name_strip_prefix: 'Coffee Machine ',
+          show_percentage: true,
+          entities: [],
+        },
+        energy: {
+          type: 'custom:ha-leaderboard-card',
+          title: 'Top Energy Consumers',
+          subtitle: 'Today',
+          header_icon: 'mdi:flash',
+          layout: 'both',
+          limit: 4,
+          decimals: 1,
+          include_pattern: 'sensor.energy_*',
+          show_percentage: true,
+          entities: [],
+        },
+      };
+
+      const card = document.getElementById('preview-card');
+      const editor = document.getElementById('card-editor');
+      const yamlOut = document.getElementById('yaml-out');
+      const eventLog = document.getElementById('event-log');
+      const simButtons = document.getElementById('sim-buttons');
+
+      let currentConfig = structuredClone(presets.coffeeTop3);
+
+      function toYaml(obj, indent = 0) {
+        const pad = '  '.repeat(indent);
+        return Object.entries(obj)
+          .filter(([, v]) => v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0))
+          .map(([key, val]) => {
+            if (Array.isArray(val)) {
+              const items = val
+                .map((item) => {
+                  if (typeof item === 'object' && item !== null) {
+                    const lines = toYaml(item, indent + 2).split('\n');
+                    return `${pad}  - ${lines[0].trimStart()}\n${lines.slice(1).join('\n')}`.trimEnd();
+                  }
+                  return `${pad}  - ${item}`;
+                })
+                .join('\n');
+              return `${pad}${key}:\n${items}`;
+            }
+            if (typeof val === 'object' && val !== null) {
+              return `${pad}${key}:\n${toYaml(val, indent + 1)}`;
+            }
+            return `${pad}${key}: ${val}`;
+          })
+          .join('\n');
+      }
+
+      function applyState(nextConfig) {
+        currentConfig = nextConfig;
+        card.setConfig(currentConfig);
+        card.hass = { ...hass, states: { ...hass.states } };
+        editor.setConfig(currentConfig);
+        editor.hass = card.hass;
+        yamlOut.textContent = toYaml(currentConfig);
+      }
+
+      editor.addEventListener('config-changed', (e) => {
+        currentConfig = e.detail.config;
+        card.setConfig(currentConfig);
+        card.hass = { ...hass, states: { ...hass.states } };
+        yamlOut.textContent = toYaml(currentConfig);
+      });
+
+      card.addEventListener('hass-more-info', (e) => {
+        eventLog.textContent = `Clicked item -> hass-more-info for ${e.detail.entityId}`;
+      });
+
+      document.querySelectorAll('[data-preset]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-preset]').forEach((b) => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
+          applyState(structuredClone(presets[btn.dataset.preset]));
+        });
+      });
+
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const isDark = document.documentElement.dataset.theme === 'dark';
+        document.documentElement.dataset.theme = isDark ? 'light' : 'dark';
+      });
+
+      const langToggleBtn = document.getElementById('lang-toggle');
+      langToggleBtn.addEventListener('click', () => {
+        const nextLang = hass.locale.language === 'de' ? 'en' : 'de';
+        hass.locale = { language: nextLang };
+        langToggleBtn.textContent = `Language: ${nextLang.toUpperCase()}`;
+        applyState(currentConfig);
+      });
+
+      const drinkButtons = [
+        ['sensor.coffee_machine_cappuccino', '+1 Cappuccino'],
+        ['sensor.coffee_machine_espresso', '+1 Espresso'],
+        ['sensor.coffee_machine_latte', '+1 Caffè Latte'],
+        ['sensor.coffee_machine_hot_water', '+1 Hot Water'],
+      ];
+
+      for (const [id, label] of drinkButtons) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pill-btn';
+        btn.textContent = label;
+        btn.addEventListener('click', () => {
+          const cur = Number(hass.states[id].state || 0);
+          hass.states[id] = { ...hass.states[id], state: String(cur + 1) };
+          applyState(currentConfig);
+        });
+        simButtons.appendChild(btn);
+      }
+
+      applyState(currentConfig);
+    </script>
+  </body>
+</html>

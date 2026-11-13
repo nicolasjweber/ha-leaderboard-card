@@ -1,0 +1,21 @@
+{
+  "name": "ha-leaderboard-card",
+  "version": "1.0.0",
+  "description": "A customizable, HACS-ready Home Assistant Lovelace card that ranks and displays top entities in a podium or ranked progress bar layout.",
+  "main": "ha-leaderboard-card.js",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/leaderboard.test.mjs",
+    "serve": "node scripts/serve.mjs"
+  },
+  "keywords": [
+    "home-assistant",
+    "lovelace",
+    "hacs",
+    "custom-card",
+    "leaderboard",
+    "podium"
+  ],
+  "license": "MIT"
+}
