@@ -189,9 +189,10 @@
       .showcase-stage {
         display: none;
         inline-size: 100%;
-        max-inline-size: 984px;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 16px;
+        max-inline-size: 900px;
+        grid-template-columns: repeat(2, minmax(0, 410px));
+        justify-content: center;
+        gap: 32px;
         align-items: center;
       }
 
@@ -249,7 +250,6 @@
     <div class="showcase-stage" id="showcase-stage" aria-label="Leaderboard Card Showcase">
       <div class="showcase-card-wrap"><ha-leaderboard-card id="sc-podium"></ha-leaderboard-card></div>
       <div class="showcase-card-wrap"><ha-leaderboard-card id="sc-list"></ha-leaderboard-card></div>
-      <div class="showcase-card-wrap"><ha-leaderboard-card id="sc-both"></ha-leaderboard-card></div>
     </div>
 
     <script type="module">
@@ -527,18 +527,6 @@
             include_pattern: 'sensor.coffee_machine_*',
             exclude_pattern: '*_total*',
             name_strip_prefix: 'Coffee Machine ',
-            show_percentage: true,
-            entities: [],
-          },
-          'sc-both': {
-            type: 'custom:ha-leaderboard-card',
-            title: 'Energy Usage',
-            subtitle: 'Today',
-            header_icon: 'mdi:flash',
-            layout: 'both',
-            limit: 5,
-            decimals: 1,
-            include_pattern: 'sensor.energy_*',
             show_percentage: true,
             entities: [],
           },
